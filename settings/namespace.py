@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+
+### Webdriver const ###
+PhantomJS = 'phantom'
+Firefox = 'fierfox'
+
+### Webdriver settings ###
+web_driver = Firefox
+service_args = None
+load_timeout = 60
+explicit_waits = 10
+implicitly_wait = 5
+
+### Direct parameters ###
+debug = True
+use_virtual_display = False
+log_dir = 'logs/'
+screen_dir = 'screen/'
+
+### Script settings ###
+argv_var = dict(
+)
