@@ -42,11 +42,11 @@ class SwithSuperMetaclass(type):
         web_drivers = {config.PhantomJS: 1, config.Firefox: 0}
         try:
             logger.info(
-                "Попытка запуска браузера. WebDriver: {!r}".format(
+                "WebDriver: {!r}".format(
                     config.web_driver))
             return web_drivers[config.web_driver]
         except KeyError:
-            raise SystemExit("Укажите правильный параметр web driver")
+            raise SystemExit("Invalid parameter web_driver")
 
 
 class WebDriver(metaclass=SwithSuperMetaclass):
@@ -99,7 +99,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         proxy_type = value.get('proxy_type', None)
 
         if not self.proxy_validation(proxy):
-            raise SystemError('Не удалось подключиться к прокси')
+            raise SystemError()
 
         if SwithSuperMetaclass.web_driver_select():
             dcap = dict(DesiredCapabilities.PHANTOMJS).copy()
@@ -173,9 +173,8 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         file_name = '{}.png'.format(str(datetime.now()))
         try:
             self.save_screenshot(file_name)
-            logger.info('Сохранен скрин под именем {!r}'.format(file_name))
+            logger.info('Save screenshot with name {!r}'.format(file_name))
         except:
-            logger.error("Не удалось сохранить скриншот!!!")
             return None
         return file_name
 
@@ -185,19 +184,19 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         :param url:
         :return:
         """
-        for i in range(0, 4):
+        for i in range(1, 4):
             # timeout = config.load_timeout + i * 10
             # self.set_page_load_timeout(timeout)
             logger.info(
-                '{!r}-ая попытка перехода по url: {!r}'.format(i + 1, url))
+                '{!r}| go to url: {!r}'.format(i, url))
 
             try:
                 self._get(url)
             except Exception as e:
-                logger.warning('Не удалось загрузить страницу: {!r}'.find(e))
+                logger.warning('Page loading error with message: {!r}'.find(str(e)))
                 continue
             else:
-                logger.info('Страница загружена')
+                logger.info('Page is load')
                 # self.set_page_load_timeout(config.load_timeout)
                 return True
 
@@ -213,7 +212,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         self.take_screenshot()
 
         if is_not_load(result):
-            raise Exception('Некоректный HTML')
+            raise Exception('Uncorrected HTML')
 
         return result
 

@@ -2,7 +2,7 @@
 
 ### Webdriver const ###
 PhantomJS = 'phantom'
-Firefox = 'fierfox'
+Firefox = 'firefox'
 
 ### Webdriver settings ###
 web_driver = Firefox
@@ -19,4 +19,13 @@ screen_dir = 'screen/'
 
 ### Script settings ###
 argv_var = dict(
+    use_virtual_display=dict(
+        default=use_virtual_display,
+        action='store_true',
+    ),
+
+    web_driver=dict(
+        choices=[PhantomJS, Firefox],
+        default=web_driver,
+    )
 )
