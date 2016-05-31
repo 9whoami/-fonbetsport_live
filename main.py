@@ -237,7 +237,6 @@ from time import sleep
 
 
 parser = Parser()
-i = 0
 
 while True:
     sleep(5)
@@ -245,7 +244,3 @@ while True:
     parser.load_site()
     parser.parsing_site()
     parser.save_json()
-
-    i += 1
-    if i == 10:
-        break
