@@ -30,6 +30,7 @@ class SwithSuperMetaclass(type):
     """
 
     def __new__(cls, name, bases, dct):
+        logger.info("WebDriver: {!r}".format(config.web_driver))
         if cls.web_driver_select():
             bases = webdriver.PhantomJS,
         else:
@@ -41,9 +42,6 @@ class SwithSuperMetaclass(type):
     def web_driver_select():
         web_drivers = {config.PhantomJS: 1, config.Firefox: 0}
         try:
-            logger.info(
-                "WebDriver: {!r}".format(
-                    config.web_driver))
             return web_drivers[config.web_driver]
         except KeyError:
             raise SystemExit("Invalid parameter web_driver")

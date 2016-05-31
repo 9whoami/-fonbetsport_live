@@ -13,7 +13,7 @@ implicitly_wait = 5
 
 ### Direct parameters ###
 debug = True
-use_virtual_display = False
+use_virtual_display = True
 log_dir = 'logs/'
 screen_dir = 'screen/'
 
@@ -21,7 +21,7 @@ screen_dir = 'screen/'
 argv_var = dict(
     use_virtual_display=dict(
         default=use_virtual_display,
-        action='store_true',
+        action='store_false',
     ),
 
     web_driver=dict(
