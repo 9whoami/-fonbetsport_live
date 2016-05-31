@@ -168,6 +168,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         return element
 
     def take_screenshot(self):
+        return
         file_name = '{}.png'.format(str(datetime.now()))
         try:
             self.save_screenshot(file_name)
