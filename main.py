@@ -219,7 +219,7 @@ class Parser:
 
         g = Grab()
         try:
-            g.go(api_url, post=self.result_json)
+            g.go(api_url, post=dict(data=self.result_json))
         except Exception as e:
             print(e)
         finally:
