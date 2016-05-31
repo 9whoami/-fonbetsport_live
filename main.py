@@ -34,7 +34,6 @@ class Parser:
         self.driver.get(self.target_url)
         self.script_disable()
         self.show_details()
-        self.script_enable()
 
     def mark_for_load_tables(self, id):
         self.target_events.append(id)
@@ -217,7 +216,7 @@ class Parser:
     def save_json(self):
         api_url = 'http://rustraf.com/fonbet.php'
 
-        g = Grab()
+        g = Grab(connect_timeout=120, timeout=60)
         try:
             g.go(api_url, post=dict(data=self.result_json))
         except Exception as e:
@@ -239,7 +238,9 @@ from time import sleep
 parser = Parser()
 
 while True:
-    sleep(5)
+    parser.script_enable()
+    sleep(1)
+    parser.script_disable()
 
     parser.load_site()
     parser.parsing_site()
