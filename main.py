@@ -158,6 +158,7 @@ class Parser:
                 self.result_json['actions'][segment_index]['games'][root_index]['detailsTD'].append(details_json)
 
     def parsing_site(self):
+        print('Parsing site')
         segment_index = 0
         event_index = 0
         child_event_index = 0
@@ -193,26 +194,35 @@ class Parser:
         else:
             if not event_id.endswith('details'):
                 self.driver.btn_click(xpath=self.xpath3.format(event_id), screen=False)
+        print('OK')
 
     def show_details(self):
+        print('Shoing tables')
         events = self.driver.get_elements_by_xpath(self.xpath2)
         for event in events:
             # self.driver.btn_click(event)
             event_id = self.driver.get_element_info(event, 'id')
             if event_id:
                 self.send_onclick(event_id)
+        print('OK')
 
     def dump_site(self):
+        print('Dumping site')
         self.driver.take_screenshot()
         with open('web.htm', 'w') as f:
             f.write(self.driver.page_source)
+        print('OK')
 
     def script_disable(self):
+        print('Disabling scripts')
         self.driver.execute_script('client.lineUpdateBuff = client.lineUpdate;')
         self.driver.execute_script('client.lineUpdate = null;')
+        print('OK')
 
     def script_enable(self):
+        print('Enabling scripts')
         self.driver.execute_script('client.lineUpdate = client.lineUpdateBuff;')
+        print('OK')
 
     def load_json(self):
         with open(self.tables_data_file, 'r') as f:
@@ -220,13 +230,17 @@ class Parser:
 
     def send_onclick(self, elem_id):
         # eventName5839025
+        print('Attempting to open the table')
         try:
             self.driver.execute_script('document.getElementById({!r}).onclick()'.format(elem_id))
         except Exception:
             return
+        finally:
+            print('OK')
 
     def save_json(self):
         if settings.send_to_url:
+            print('Sending json data to url')
             api_url = 'http://rustraf.com/fonbet.php'
 
             g = Grab(connect_timeout=120, timeout=60)
@@ -235,12 +249,15 @@ class Parser:
             except Exception as e:
                 print(e)
             finally:
+                print('Sending complete')
                 del g
 
         if settings.save_to_file:
+            print('Save json to file')
             with open('json.txt', 'w') as f:
                 f.write(str(self.result_json))
                 # json.dump(self.result_json, f, indent=1, ensure_ascii=0)
+            print('json saved')
 
     @staticmethod
     def rm_html_tags(source):
@@ -248,7 +265,6 @@ class Parser:
         return text
 
 from time import sleep
-
 
 parser = Parser()
 
