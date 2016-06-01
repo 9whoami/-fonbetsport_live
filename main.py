@@ -27,7 +27,6 @@ class Parser:
     target_events = list()
 
     def __init__(self):
-        self.result_json = dict(time=0, actions=list())
         # self.tables_data = self.load_tables_data()
         self.parser = etree.HTMLParser(encoding='utf-8')
 
@@ -159,6 +158,7 @@ class Parser:
 
     def parsing_site(self):
         print('Parsing site')
+        self.result_json = dict(time=0, actions=list())
         segment_index = 0
         event_index = 0
         child_event_index = 0
