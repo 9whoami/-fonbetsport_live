@@ -3,6 +3,7 @@
 
 import re
 import json
+from datetime import datetime
 from grab import Grab
 from lxml import etree
 from commons import WebDriver
@@ -169,7 +170,9 @@ class Parser:
 
             if event_id.startswith('event') and not event_id.endswith('details'):
                 if event_id not in tr_id:
-                    self.driver.btn_click(xpath=self.xpath3.format(event_id), screen=False)
+                    event_div_id = 'eventName{}'.format(event_id[len('event'):])
+                    self.send_onclick(event_div_id)
+                    # self.driver.btn_click(xpath=self.xpath3.format(event_id), screen=False)
             event_id = tr_id
 
             if tr_id.startswith('segment'):
@@ -191,11 +194,13 @@ class Parser:
             if not event_id.endswith('details'):
                 self.driver.btn_click(xpath=self.xpath3.format(event_id), screen=False)
 
-
     def show_details(self):
         events = self.driver.get_elements_by_xpath(self.xpath2)
         for event in events:
-            self.driver.btn_click(event)
+            # self.driver.btn_click(event)
+            event_id = self.driver.get_element_info(event, 'id')
+            if event_id:
+                self.send_onclick(event_id)
 
     def dump_site(self):
         self.driver.take_screenshot()
@@ -213,6 +218,13 @@ class Parser:
         with open(self.tables_data_file, 'r') as f:
             return json.loads(f.read())
 
+    def send_onclick(self, elem_id):
+        # eventName5839025
+        try:
+            self.driver.execute_script('document.getElementById({!r}).onclick()'.format(elem_id))
+        except Exception:
+            return
+
     def save_json(self):
         api_url = 'http://rustraf.com/fonbet.php'
 
@@ -224,8 +236,9 @@ class Parser:
         finally:
             del g
 
-        with open('result.json', 'w') as f:
-            json.dump(self.result_json, f, indent=1, ensure_ascii=0)
+        # with open('{}.txt'.format(datetime.now()), 'w') as f:
+        #     f.write(str(self.result_json))
+            # json.dump(self.result_json, f, indent=1, ensure_ascii=0)
 
     @staticmethod
     def rm_html_tags(source):
