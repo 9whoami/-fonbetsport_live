@@ -3,6 +3,7 @@
 
 import re
 import json
+import settings
 from datetime import datetime
 from grab import Grab
 from lxml import etree
@@ -226,19 +227,21 @@ class Parser:
             return
 
     def save_json(self):
-        api_url = 'http://rustraf.com/fonbet.php'
+        if settings.send_to_url:
+            api_url = 'http://rustraf.com/fonbet.php'
 
-        g = Grab(connect_timeout=120, timeout=60)
-        try:
-            g.go(api_url, post=dict(data=self.result_json))
-        except Exception as e:
-            print(e)
-        finally:
-            del g
+            g = Grab(connect_timeout=120, timeout=60)
+            try:
+                g.go(api_url, post=dict(data=self.result_json))
+            except Exception as e:
+                print(e)
+            finally:
+                del g
 
-        # with open('{}.txt'.format(datetime.now()), 'w') as f:
-        #     f.write(str(self.result_json))
-            # json.dump(self.result_json, f, indent=1, ensure_ascii=0)
+        if settings.save_to_file:
+            with open('{}.txt'.format(datetime.now()), 'w') as f:
+                f.write(str(self.result_json))
+                # json.dump(self.result_json, f, indent=1, ensure_ascii=0)
 
     @staticmethod
     def rm_html_tags(source):
