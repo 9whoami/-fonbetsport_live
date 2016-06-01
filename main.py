@@ -4,7 +4,6 @@
 import re
 import json
 import settings
-from datetime import datetime
 from grab import Grab
 from lxml import etree
 from commons import WebDriver
@@ -239,7 +238,7 @@ class Parser:
                 del g
 
         if settings.save_to_file:
-            with open('{}.txt'.format(datetime.now()), 'w') as f:
+            with open('json.txt', 'w') as f:
                 f.write(str(self.result_json))
                 # json.dump(self.result_json, f, indent=1, ensure_ascii=0)
 
