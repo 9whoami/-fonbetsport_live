@@ -5,7 +5,7 @@
 
 
 ```
-#!python
+#!html
 
   -h, --help            Справка
   --web_driver {phantom,firefox}
