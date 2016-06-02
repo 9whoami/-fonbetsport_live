@@ -276,4 +276,3 @@ while True:
     parser.load_site()
     parser.parsing_site()
     parser.save_json()
-    exit()
