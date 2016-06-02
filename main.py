@@ -255,7 +255,7 @@ class Parser:
         if settings.save_to_file:
             print('Save json to file')
             with open('json.txt', 'w') as f:
-                f.write(str(self.result_json))
+                # f.write(str(self.result_json))
                 json.dump(self.result_json, f, indent=1, ensure_ascii=0)
             print('json saved')
 
