@@ -225,7 +225,7 @@ class Parser:
         print('OK')
 
     def load_json(self):
-        with open(self.tables_data_file, 'r') as f:
+        with open('json.txt', 'r') as f:
             return json.loads(f.read())
 
     def send_onclick(self, elem_id):
@@ -245,7 +245,7 @@ class Parser:
 
             g = Grab(connect_timeout=120, timeout=60)
             try:
-                g.go(api_url, post=dict(data=self.result_json))
+                g.go(api_url, post=dict(data=json.dumps(self.result_json, indent=1, ensure_ascii=0)))
             except Exception as e:
                 print(e)
             finally:
@@ -256,7 +256,7 @@ class Parser:
             print('Save json to file')
             with open('json.txt', 'w') as f:
                 f.write(str(self.result_json))
-                # json.dump(self.result_json, f, indent=1, ensure_ascii=0)
+                json.dump(self.result_json, f, indent=1, ensure_ascii=0)
             print('json saved')
 
     @staticmethod
@@ -276,3 +276,4 @@ while True:
     parser.load_site()
     parser.parsing_site()
     parser.save_json()
+    exit()
