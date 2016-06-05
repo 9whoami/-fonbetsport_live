@@ -30,16 +30,19 @@ class Parser:
         # self.tables_data = self.load_tables_data()
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver()
-        self.driver.get(self.target_url)
-        self.script_disable()
-        self.show_details()
+        # self.driver = WebDriver()
+        # self.driver.get(self.target_url)
+        # self.script_disable()
+        # self.show_details()
+
+    def make_personal_total(self, table_json):
+        pass
 
     def mark_for_load_tables(self, id):
         self.target_events.append(id)
 
     def load_site(self):
-        self.dump_site()
+        # self.dump_site()
         self.page = etree.parse(self.site_dump_file, parser=self.parser)
 
     @staticmethod
@@ -124,25 +127,52 @@ class Parser:
                 break
 
         for table in div.getchildren():
-            # print(table.attrib['id'])
             table_json = dict()
 
             thead = table.getchildren()[0]
-            tbody = table.getchildren()[1]
+            body_trs = table.getchildren()[1].getchildren()
 
-            headers = ['description', 'name']
-            body_trs = tbody.getchildren()
+            if len(thead) == 2:
+                name = thead.getchildren()[0].getchildren()[0].text
+            else:
+                # TODO for test
+                name = thead.getchildren()[0].getchildren()[0].text
 
-            for i, tr in enumerate(reversed(thead)):
-                for j, th in enumerate(tr):
-                    if i == 1:
-                        table_json[headers[i]] = th.text
+            if name:
+                table_json['name'] = name
+            table_json['description'] = list()
+
+            if 'индивидуальный тотал' in name.lower():
+                personal_total = list()
+                total = list()
+                ths = thead.getchildren()[1]
+                for body_tr in body_trs:
+                    for i, td in enumerate(body_tr):
+                        if 'тотал' in ths[i].text.lower():
+                            if total:
+                                personal_total.append(total)
+                            total = list()
+                        total.append({ths[i].text: td.text})
+                else:
+                    if total:
+                        personal_total.append(total)
+                table_json['description'].append(personal_total)
+            elif 'кто первым забьет гол' in name.lower():
+                ths = thead.getchildren()[0]
+                for tr in body_trs:
+                    b_json = list()
+                    for i, td in enumerate(tr):
+                        b_json.append({ths[i].text: td.text})
                     else:
-                        for body_tr in body_trs:
-                            if not table_json.get(headers[i]):
-                                table_json[headers[i]] = list()
-                            body_td = body_tr.getchildren()[j]
-                            table_json[headers[i]].append({th.text: body_td.text if i == 0 else ''})
+                        table_json['description'].append(b_json)
+            else:
+                ths = thead.getchildren()[len(thead) -1]
+                for tr in body_trs:
+                    b_json = list()
+                    for i, td in enumerate(tr):
+                        b_json.append({ths[i].text: td.text})
+                    else:
+                        table_json['description'].append(b_json)
 
             details_json.append(table_json)
 
@@ -269,10 +299,11 @@ from time import sleep
 parser = Parser()
 
 while True:
-    parser.script_enable()
-    sleep(1)
-    parser.script_disable()
+    # parser.script_enable()
+    # sleep(1)
+    # parser.script_disable()
 
     parser.load_site()
     parser.parsing_site()
     parser.save_json()
+    exit()
