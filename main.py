@@ -355,4 +355,3 @@ parser = Parser()
 
 while True:
     parse()
-    exit()
