@@ -116,6 +116,32 @@ class Parser:
             self.result_json['actions'][segment_index]['games'][event_index]['round'].append(chid_json)
 
     def _get_event_details(self, segment_index, tr, child_index=None, root_index=None):
+
+        def row_wrapper_p2p(str_point):
+            out_wrapper = list()
+            inner_wrapper = list()
+            ths = thead.getchildren()[1]
+            for body_tr in body_trs:
+                for i, td in enumerate(body_tr):
+                    if str_point in ths[i].text.lower():
+                        if inner_wrapper:
+                            out_wrapper.append(inner_wrapper)
+                        inner_wrapper = list()
+                    inner_wrapper.append({ths[i].text: td.text})
+            else:
+                if inner_wrapper:
+                    out_wrapper.append(inner_wrapper)
+                table_json['description'].append(out_wrapper)
+
+        def row_wrapper(*args):
+            ths = thead.getchildren()[len(thead) - 1]
+            for tr in body_trs:
+                wrapper = list()
+                for i, td in enumerate(tr):
+                    wrapper.append({ths[i].text: td.text})
+                else:
+                    table_json['description'].append(wrapper)
+
         details_json = list()
         div = []
 
@@ -132,47 +158,16 @@ class Parser:
             thead = table.getchildren()[0]
             body_trs = table.getchildren()[1].getchildren()
 
-            if len(thead) == 2:
-                name = thead.getchildren()[0].getchildren()[0].text
-            else:
-                # TODO for test
-                name = thead.getchildren()[0].getchildren()[0].text
+            name = thead.getchildren()[0].getchildren()[0].text
 
             if name:
                 table_json['name'] = name
             table_json['description'] = list()
 
-            if 'индивидуальный тотал' in name.lower():
-                personal_total = list()
-                total = list()
-                ths = thead.getchildren()[1]
-                for body_tr in body_trs:
-                    for i, td in enumerate(body_tr):
-                        if 'тотал' in ths[i].text.lower():
-                            if total:
-                                personal_total.append(total)
-                            total = list()
-                        total.append({ths[i].text: td.text})
-                else:
-                    if total:
-                        personal_total.append(total)
-                table_json['description'].append(personal_total)
-            elif 'кто первым забьет гол' in name.lower():
-                ths = thead.getchildren()[0]
-                for tr in body_trs:
-                    b_json = list()
-                    for i, td in enumerate(tr):
-                        b_json.append({ths[i].text: td.text})
-                    else:
-                        table_json['description'].append(b_json)
-            else:
-                ths = thead.getchildren()[len(thead) -1]
-                for tr in body_trs:
-                    b_json = list()
-                    for i, td in enumerate(tr):
-                        b_json.append({ths[i].text: td.text})
-                    else:
-                        table_json['description'].append(b_json)
+            target_point = {'индивидульный тотал': 'тотал', 'форы': 'фора'}
+            case_of = {'индивидульный тотал': row_wrapper_p2p, 'форы': row_wrapper_p2p}
+
+            case_of.get(name.lower(), row_wrapper)(target_point.get(name.lower(), None))
 
             details_json.append(table_json)
 
