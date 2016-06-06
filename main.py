@@ -27,13 +27,13 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        # self.driver = WebDriver()
-        # self.driver.get(self.target_url)
-        # self.script_disable()
-        # self.show_details()
+        self.driver = WebDriver()
+        self.driver.get(self.target_url)
+        self.script_disable()
+        self.show_details()
 
     def load_site(self):
-        # self.dump_site()
+        self.dump_site()
         self.page = etree.parse(self.site_dump_file, parser=self.parser)
 
     @staticmethod
@@ -343,9 +343,9 @@ def timer(fun):
 
 @timer
 def parse():
-    # parser.script_enable()
-    # time.sleep(1)
-    # parser.script_disable()
+    parser.script_enable()
+    time.sleep(1)
+    parser.script_disable()
 
     parser.load_site()
     parser.parsing_site()
