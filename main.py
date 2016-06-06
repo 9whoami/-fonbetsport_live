@@ -3,6 +3,7 @@
 
 import re
 import json
+import time
 import settings
 from grab import Grab
 from lxml import etree
@@ -15,34 +16,24 @@ __description__ = """"""
 
 
 class Parser:
-    tables_data_file = 'tables'
     site_dump_file = 'web.htm'
-
+    json_file = 'json.txt'
     target_url = 'https://live.fonbetsport.com/?locale=ru'
+    api_url = 'http://rustraf.com/fonbet.php'
 
-    xpath = './/table[@id="lineTable"]/tbody/tr'
-    xpath2 = ".//table[@id='lineTable']/tbody/tr/td/div[1]"
-    xpath3 = ".//table[@id='lineTable']/tbody/tr[@id={!r}]/td/div[1]"
-
-    target_events = list()
+    events_xpath = './/table[@id="lineTable"]/tbody/tr'
+    event_arrow_xpath = ".//table[@id='lineTable']/tbody/tr/td/div[1]"
 
     def __init__(self):
-        # self.tables_data = self.load_tables_data()
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        # self.driver = WebDriver()
-        # self.driver.get(self.target_url)
-        # self.script_disable()
-        # self.show_details()
-
-    def make_personal_total(self, table_json):
-        pass
-
-    def mark_for_load_tables(self, id):
-        self.target_events.append(id)
+        self.driver = WebDriver()
+        self.driver.get(self.target_url)
+        self.script_disable()
+        self.show_details()
 
     def load_site(self):
-        # self.dump_site()
+        self.dump_site()
         self.page = etree.parse(self.site_dump_file, parser=self.parser)
 
     @staticmethod
@@ -164,10 +155,9 @@ class Parser:
                 table_json['name'] = name
             table_json['description'] = list()
 
-            target_point = {'индивидульный тотал': 'тотал', 'форы': 'фора'}
-            case_of = {'индивидульный тотал': row_wrapper_p2p, 'форы': row_wrapper_p2p}
-
-            case_of.get(name.lower(), row_wrapper)(target_point.get(name.lower(), None))
+            target_point = {'Индивидуальный тотал': 'тотал', 'Форы': 'фора'}
+            case_of = {'Индивидуальный тотал': row_wrapper_p2p, 'Форы': row_wrapper_p2p}
+            case_of.get(name, row_wrapper)(target_point.get(name, None))
 
             details_json.append(table_json)
 
@@ -189,16 +179,14 @@ class Parser:
         child_event_index = 0
         event_id = ''
 
-        trs = self.page.xpath(self.xpath)
+        trs = self.page.xpath(self.events_xpath)
 
         for cnt, tr in enumerate(trs):
             tr_id = tr.attrib['id']
 
             if event_id.startswith('event') and not event_id.endswith('details'):
                 if event_id not in tr_id:
-                    event_div_id = 'eventName{}'.format(event_id[len('event'):])
-                    self.send_onclick(event_div_id)
-                    # self.driver.btn_click(xpath=self.xpath3.format(event_id), screen=False)
+                    self.send_onclick(event_id)
             event_id = tr_id
 
             if tr_id.startswith('segment'):
@@ -218,87 +206,119 @@ class Parser:
                     self._get_event_details(segment_index, tr, child_index=child_event_index, root_index=event_index)
         else:
             if not event_id.endswith('details'):
-                self.driver.btn_click(xpath=self.xpath3.format(event_id), screen=False)
-        print('OK')
+                self.send_onclick(event_id)
+        print('Parsing site...OK')
 
     def show_details(self):
         print('Shoing tables')
-        events = self.driver.get_elements_by_xpath(self.xpath2)
-        for event in events:
-            # self.driver.btn_click(event)
-            event_id = self.driver.get_element_info(event, 'id')
-            if event_id:
-                self.send_onclick(event_id)
-        print('OK')
+        try:
+            events = self.driver.get_elements_by_xpath(self.event_arrow_xpath)
+            for event in events:
+                # self.driver.btn_click(event)
+                event_id = self.driver.get_element_info(event, 'id')
+                if event_id:
+                    self.send_onclick(event_id)
+        except Exception as e:
+            print('Shoing tables...ERROR')
+        else:
+            print('Shoing tables...OK')
 
     def dump_site(self):
         print('Dumping site')
-        self.driver.take_screenshot()
-        with open('web.htm', 'w') as f:
-            f.write(self.driver.page_source)
-        print('OK')
+        try:
+            with open('web.htm', 'w') as f:
+                f.write(self.driver.page_source)
+        except Exception as e:
+            print('Dumping site...ERROR')
+        else:
+            print('Dumping site...OK')
 
     def script_disable(self):
         print('Disabling scripts')
-        self.driver.execute_script('client.lineUpdateBuff = client.lineUpdate;')
-        self.driver.execute_script('client.lineUpdate = null;')
-        print('OK')
+        try:
+            self.driver.execute_script('client.lineUpdateBuff = client.lineUpdate;')
+            self.driver.execute_script('client.lineUpdate = null;')
+        except Exception:
+            print('Disabling scripts...ERROR')
+        else:
+            print('Disabling scripts...OK')
 
     def script_enable(self):
         print('Enabling scripts')
-        self.driver.execute_script('client.lineUpdate = client.lineUpdateBuff;')
-        print('OK')
+        try:
+            self.driver.execute_script('client.lineUpdate = client.lineUpdateBuff;')
+        except Exception:
+            print('Enabling scripts...ERROR')
+        else:
+            print('Enabling scripts...OK')
 
     def load_json(self):
-        with open('json.txt', 'r') as f:
-            return json.loads(f.read())
+        print('### Loading JSON data ###')
+        try:
+            with open(self.json_file, 'r') as f:
+                return json.loads(f.read())
+        except Exception as e:
+            print('Error with message: {!r}'.format(e))
+        else:
+            print('### JSON loaded ###')
 
     def send_onclick(self, elem_id):
         # eventName5839025
         print('Attempting to open the table')
         try:
-            self.driver.execute_script('document.getElementById({!r}).onclick()'.format(elem_id))
+            event_div_id = 'eventName{}'.format(elem_id[len('event'):])
+            self.driver.execute_script('document.getElementById({!r}).onclick()'.format(event_div_id))
         except Exception:
-            return
-        finally:
-            print('OK')
+            print('Attempting to open the table...ERROR')
+        else:
+            print('Attempting to open the table...OK')
 
     def save_json(self):
         if settings.send_to_url:
-            print('Sending json data to url')
-            api_url = 'http://rustraf.com/fonbet.php'
+            print('### Sending json data to url ###')
 
             g = Grab(connect_timeout=120, timeout=60)
             try:
-                g.go(api_url, post=dict(data=json.dumps(self.result_json, indent=1, ensure_ascii=0)))
+                print('Send post data to {!r}'.format(self.api_url))
+                g.go(self.api_url, post=dict(data=json.dumps(self.result_json, indent=1, ensure_ascii=0)))
             except Exception as e:
-                print(e)
+                print('Error with message: {!r}'.format(e))
             finally:
-                print('Sending complete')
+                print('### Sending complete ###')
                 del g
 
         if settings.save_to_file:
-            print('Save json to file')
-            with open('json.txt', 'w') as f:
-                # f.write(str(self.result_json))
-                json.dump(self.result_json, f, indent=1, ensure_ascii=0)
-            print('json saved')
+            print('### Save JSON to file ###')
+            try:
+                with open(self.json_file, 'w') as f:
+                    json.dump(self.result_json, f, indent=1, ensure_ascii=0)
+            except Exception as e:
+                print('Error with message: {!r}'.format(e))
+            else:
+                print('### JSON saved ###')
 
     @staticmethod
     def rm_html_tags(source):
         text = re.sub(r'\s+', ' ', re.sub(r'\<[^\>]*\>', '', source))
         return text
 
-from time import sleep
+
+class Timer(object):
+    def __enter__(self):
+        self._startTime = time.monotonic()
+
+    def __exit__(self, type, value, traceback):
+        print("Elapsed time: {:.9f} sec".format(time.monotonic() - self._startTime))
+
 
 parser = Parser()
 
 while True:
-    # parser.script_enable()
-    # sleep(1)
-    # parser.script_disable()
+    with Timer():
+        parser.script_enable()
+        time.sleep(1)
+        parser.script_disable()
 
-    parser.load_site()
-    parser.parsing_site()
-    parser.save_json()
-    exit()
+        parser.load_site()
+        parser.parsing_site()
+        parser.save_json()
