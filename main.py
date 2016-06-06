@@ -27,13 +27,13 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver()
-        self.driver.get(self.target_url)
-        self.script_disable()
-        self.show_details()
+        # self.driver = WebDriver()
+        # self.driver.get(self.target_url)
+        # self.script_disable()
+        # self.show_details()
 
     def load_site(self):
-        self.dump_site()
+        # self.dump_site()
         self.page = etree.parse(self.site_dump_file, parser=self.parser)
 
     @staticmethod
@@ -311,14 +311,48 @@ class Timer(object):
         print("Elapsed time: {:.9f} sec".format(time.monotonic() - self._startTime))
 
 
+def timer(fun):
+    max_time = 0.0
+    min_time = 999.9
+    average_time = 0.0
+
+    def wrapper(*args, **kwargs):
+        nonlocal max_time, min_time, average_time
+
+        start_time = time.monotonic()
+        fun(*args, **kwargs)
+        end_time = time.monotonic() - start_time
+
+        if min_time > end_time:
+            min_time = end_time
+
+        if max_time < end_time:
+            max_time = end_time
+
+        average_time = (min_time + max_time) / 2
+
+        print("*" * 20,
+              "Elapsed time: {:.9f} sec".format(end_time),
+              "Min. time {:.9f} sec".format(min_time),
+              "Max. time {:.9f} sec".format(max_time),
+              "Average time {:.9f} sec".format(average_time),
+              "*" * 20, sep='\n')
+
+    return wrapper
+
+
+@timer
+def parse():
+    # parser.script_enable()
+    # time.sleep(1)
+    # parser.script_disable()
+
+    parser.load_site()
+    parser.parsing_site()
+    parser.save_json()
+
 parser = Parser()
 
 while True:
-    with Timer():
-        parser.script_enable()
-        time.sleep(1)
-        parser.script_disable()
-
-        parser.load_site()
-        parser.parsing_site()
-        parser.save_json()
+    parse()
+    exit()
