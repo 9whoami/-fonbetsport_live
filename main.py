@@ -352,6 +352,11 @@ def parse():
     parser.save_json()
 
 parser = Parser()
+import random
 
 while True:
     parse()
+    if random.randint(1, 5) == 5:
+        parser.driver.refresh()
+        # del parser
+        # parser = Parser()
