@@ -39,10 +39,16 @@ class Parser:
     @staticmethod
     def _get_segment(cnt, tr):
         td = tr.getchildren()[0]
-        div = td.getchildren()[0].getchildren()[1]
+        try:
+            div = td.getchildren()[0].getchildren()[1]
+        except:
+            try:
+                div = td.getchildren()[0].getchildren()[0]
+            except:
+                div = 'unknown'
         segment_id = tr.attrib['id'][len('segment'):]
 
-        return dict(name=div.text, segment=int(segment_id), games=list())
+        return dict(name=div if isinstance(div, str) else div.text, segment=int(segment_id), games=list())
 
     def _get_root_event(self, segment_index, event_id, tr):
         root_json = dict()
