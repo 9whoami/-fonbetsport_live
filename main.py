@@ -45,6 +45,8 @@ class Parser:
             try:
                 div = td.getchildren()[0].getchildren()[0]
             except:
+                print(etree.tounicode(td), '\n\n')
+                print(etree.tounicode(tr), '\n\n')
                 div = None
         segment_id = tr.attrib['id'][len('segment'):]
 
@@ -269,15 +271,11 @@ class Parser:
             print('### JSON loaded ###')
 
     def send_onclick(self, elem_id):
-        # eventName5839025
-        print('Attempting to open the table')
         try:
             event_div_id = 'eventName{}'.format(elem_id[len('event'):])
             self.driver.execute_script('document.getElementById({!r}).onclick()'.format(event_div_id))
         except Exception:
-            print('Attempting to open the table...ERROR')
-        else:
-            print('Attempting to open the table...OK')
+            print('Send event "onclick" to element id "{}"...ERROR'.format(elem_id))
 
     def save_json(self):
         if settings.send_to_url:
@@ -318,12 +316,13 @@ class Timer(object):
 
 
 def timer(fun):
+    time_story = list()
     max_time = 0.0
     min_time = 999.9
     average_time = 0.0
 
     def wrapper(*args, **kwargs):
-        nonlocal max_time, min_time, average_time
+        nonlocal max_time, min_time, average_time, time_story
 
         start_time = time.monotonic()
         fun(*args, **kwargs)
@@ -335,7 +334,11 @@ def timer(fun):
         if max_time < end_time:
             max_time = end_time
 
-        average_time = (min_time + max_time) / 2
+        time_story.append(end_time)
+        buffer = 0
+        for t in time_story:
+            buffer += t
+        average_time = buffer / len(time_story)
 
         print("*" * 20,
               "Elapsed time: {:.9f} sec".format(end_time),
