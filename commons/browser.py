@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.proxy import *
@@ -112,7 +113,8 @@ class WebDriver(metaclass=SwithSuperMetaclass):
                 dcap["phantomjs.page.settings.userAgent"] = user_agent
 
             self._profile = dict(desired_capabilities=dcap,
-                                 service_args=service_args)
+                                 service_args=service_args,
+                                 executable_path='./phantomjs')
         else:
             ff_profile = webdriver.FirefoxProfile()
             if user_agent:
@@ -168,7 +170,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         return element
 
     def take_screenshot(self):
-        return
+        # return
         file_name = '{}.png'.format(str(datetime.now()))
         try:
             self.save_screenshot(file_name)
@@ -192,7 +194,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
             try:
                 self._get(url)
             except Exception as e:
-                logger.warning('Page loading error with message: {!r}'.find(str(e)))
+                logger.warning(e)
                 continue
             else:
                 logger.info('Page is load')

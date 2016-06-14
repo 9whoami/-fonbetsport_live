@@ -27,7 +27,7 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver(proxy='108.55.192.178:20614', proxy_type='socks5')
+        self.driver = WebDriver()
         self.driver.get(self.target_url)
         self.script_disable()
         self.show_details()
