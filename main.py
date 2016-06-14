@@ -44,7 +44,7 @@ class Parser:
 
         segment_id = tr.attrib['id'][len('segment'):]
 
-        return dict(name=div.text if div else 'unknown', segment=int(segment_id), games=list())
+        return dict(name=div.text, segment=int(segment_id), games=list())
 
     def _get_root_event(self, segment_index, event_id, tr):
         root_json = dict()
