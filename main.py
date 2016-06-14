@@ -27,7 +27,7 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver()
+        self.driver = WebDriver(proxy='108.55.192.178:20614', proxy_type='socks5')
         self.driver.get(self.target_url)
         self.script_disable()
         self.show_details()
@@ -39,15 +39,9 @@ class Parser:
     @staticmethod
     def _get_segment(cnt, tr):
         td = tr.getchildren()[0]
-        try:
-            div = td.getchildren()[0].getchildren()[1]
-        except:
-            try:
-                div = td.getchildren()[0].getchildren()[0]
-            except:
-                print(etree.tounicode(td), '\n\n')
-                print(etree.tounicode(tr), '\n\n')
-                div = None
+
+        div = td.getchildren()[0].getchildren()[1]
+
         segment_id = tr.attrib['id'][len('segment'):]
 
         return dict(name=div.text if div else 'unknown', segment=int(segment_id), games=list())
