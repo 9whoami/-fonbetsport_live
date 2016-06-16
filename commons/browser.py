@@ -10,7 +10,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.proxy import *
@@ -78,8 +77,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
             return True
 
         g = Grab()
-        g.setup(proxy=proxy, proxy_type='socks5', connect_timeout=5,
-                timeout=60)
+        g.setup(proxy=proxy, proxy_type='socks5', connect_timeout=5, timeout=60)
 
         try:
             g.go('http://www.match.com/')
@@ -170,7 +168,7 @@ class WebDriver(metaclass=SwithSuperMetaclass):
         return element
 
     def take_screenshot(self):
-        # return
+        return
         file_name = '{}.png'.format(str(datetime.now()))
         try:
             self.save_screenshot(file_name)

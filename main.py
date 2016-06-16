@@ -5,8 +5,10 @@ import re
 import json
 import time
 import settings
+from datetime import datetime
 from grab import Grab
 from lxml import etree
+from lxml.html import fromstring
 from commons import WebDriver
 
 __author__ = "whoami"
@@ -17,8 +19,8 @@ __description__ = """"""
 
 class Parser:
     site_dump_file = 'web.htm'
-    json_file = 'json.txt'
-    target_url = 'https://live.fonbetsport.com/?locale=ru'
+    json_file = 'result.json'
+    target_url = 'http://live.fonbetsport.com/?locale=ru'
     api_url = 'http://rustraf.com/fonbet.php'
 
     events_xpath = './/table[@id="lineTable"]/tbody/tr'
@@ -27,17 +29,17 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver()
+        self.driver = WebDriver(proxy='73.2.246.209:17209', proxy_type='socks5')
         self.driver.get(self.target_url)
         self.script_disable()
         self.show_details()
 
     def load_site(self):
-        self.dump_site()
-        self.page = etree.parse(self.site_dump_file, parser=self.parser)
+        # self.dump_site()
+        # self.page = etree.parse(self.driver.page_source, parser=self.parser)
+        self.page = fromstring(self.driver.page_source, parser=self.parser)
 
-    @staticmethod
-    def _get_segment(cnt, tr):
+    def _get_segment(self, tr):
         td = tr.getchildren()[0]
 
         div = td.getchildren()[0].getchildren()[1]
@@ -192,7 +194,7 @@ class Parser:
             event_id = tr_id
 
             if tr_id.startswith('segment'):
-                self.result_json['actions'].append(dict(self._get_segment(cnt, tr)))
+                self.result_json['actions'].append(dict(self._get_segment(tr)))
                 segment_index = len(self.result_json['actions']) -1
             elif tr_id.startswith('event') and not tr_id.endswith('details'):
                 if 'level1' in tr.attrib['class']:
@@ -272,24 +274,26 @@ class Parser:
             print('Send event "onclick" to element id "{}"...ERROR'.format(elem_id))
 
     def save_json(self):
+        json_data = json.dumps(self.result_json, indent=1, ensure_ascii=0)
         if settings.send_to_url:
             print('### Sending json data to url ###')
 
             g = Grab(connect_timeout=120, timeout=60)
             try:
                 print('Send post data to {!r}'.format(self.api_url))
-                g.go(self.api_url, post=dict(data=json.dumps(self.result_json, indent=1, ensure_ascii=0)))
+                g.go(self.api_url, post=dict(data=json_data))
             except Exception as e:
                 print('Error with message: {!r}'.format(e))
-            finally:
+            else:
                 print('### Sending complete ###')
+            finally:
                 del g
 
         if settings.save_to_file:
             print('### Save JSON to file ###')
             try:
                 with open(self.json_file, 'w') as f:
-                    json.dump(self.result_json, f, indent=1, ensure_ascii=0)
+                    f.write(json_data)
             except Exception as e:
                 print('Error with message: {!r}'.format(e))
             else:
@@ -358,8 +362,19 @@ parser = Parser()
 import random
 
 while True:
-    parse()
-    if random.randint(1, 5) == 5:
+    try:
+        parse()
+    except Exception as e:
+        time_stamp = str(datetime.now())
+        exception_file = '{}.txt'.format(time_stamp)
+        html_file = '{}.htm'.format(time_stamp)
+        with open(exception_file, 'w') as f:
+            f.write(str(e))
+        with open(html_file, 'w') as f:
+            f.write(parser.driver.page_source)
+        raise SystemExit(e)
+
+    if random.randint(1, 20) == 20:
         parser.driver.refresh()
         # del parser
         # parser = Parser()
