@@ -29,14 +29,14 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver(proxy='73.2.246.209:17209', proxy_type='socks5')
+        self.driver = WebDriver() # (proxy='108.41.39.180:48866', proxy_type='socks5')
         self.driver.get(self.target_url)
         self.script_disable()
         self.show_details()
 
     def load_site(self):
         # self.dump_site()
-        # self.page = etree.parse(self.driver.page_source, parser=self.parser)
+        # self.page = etree.parse(self.site_dump_file, parser=self.parser)
         self.page = fromstring(self.driver.page_source, parser=self.parser)
 
     def _get_segment(self, tr):
@@ -56,7 +56,7 @@ class Parser:
             if 'eventCellName' in td.attrib.get('class', ''):
                 if td.getchildren():
                     for div in td.getchildren():
-                        if div.attrib.get('class') in 'event':
+                        if div.attrib.get('class') in ['event', 'eventBlocked']:
                             span = div.getchildren()[0]
                             root_json['eventNumber'] = span.text
                             separator = ['/', '—']
@@ -262,7 +262,7 @@ class Parser:
             with open(self.json_file, 'r') as f:
                 return json.loads(f.read())
         except Exception as e:
-            print('Error with message: {!r}'.format(e))
+            print('Error with message: {!r}'.format(str(e)))
         else:
             print('### JSON loaded ###')
 
